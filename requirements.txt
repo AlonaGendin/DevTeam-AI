@@ -1,11 +1,11 @@
 # תקשורת עם גיטהב
-requests
+requests==2.34.2
 
 # בדיקות אוטומטיות
-pytest
+pytest==9.2.0
 
 # מדידת טוקנים
-tiktoken
+tiktoken==0.14.0
 
 # תקשורת עם מודל גמנאי
 google-genai==3.6.1
