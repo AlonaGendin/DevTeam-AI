@@ -11,7 +11,6 @@
 import json
 import tiktoken
 
-from src import state
 from src.state import AgentState
 from src.memory import (
     save_note,
@@ -19,6 +18,27 @@ from src.memory import (
     build_reduced_context
 )
 
+# הפקת סיכום הפרויקט מתוך ההקשר
+def mock_answer(context):
+    notes = context["notes"]
+
+    tasks = notes.get("tasks", [])
+    team = notes.get("team", {})
+
+    required_hours = sum(
+        task["estimated_hours"] for task in tasks
+    )
+
+    available_hours = sum(team.values())
+
+    return {
+        "tasks": tasks,
+        "team": team,
+        "required_hours": required_hours,
+        "available_hours": available_hours,
+        "remaining_hours": available_hours - required_hours,
+        "capacity_sufficient": available_hours >= required_hours
+    }
 
 def run_experiment():
 
@@ -107,6 +127,37 @@ def run_experiment():
     print(f"Full context tokens: {full_tokens}")
     print(f"Reduced context tokens: {reduced_tokens}")
     print(f"Token reduction: {token_reduction:.2f}%")
+
+        # הגדרת התוצאה הצפויה מראש
+    expected_answer = {
+        "tasks": [
+            {"title": "Login page", "estimated_hours": 4},
+            {"title": "Database integration", "estimated_hours": 6},
+            {"title": "Automated tests", "estimated_hours": 3}
+        ],
+        "team": {
+            "ortal": 10,
+            "alona": 8
+        },
+        "required_hours": 13,
+        "available_hours": 18,
+        "remaining_hours": 5,
+        "capacity_sufficient": True
+    }
+
+    # הפקת תשובה מכל סוג הקשר
+    full_answer = mock_answer(full)
+    reduced_answer = mock_answer(reduced)
+
+    # השוואת התשובות לתוצאה הצפויה
+    print("\n=== Answer Comparison ===")
+    print(f"Full answer: {full_answer}")
+    print(f"Reduced answer: {reduced_answer}")
+    print(f"Full answer correct: {full_answer == expected_answer}")
+    print(f"Reduced answer correct: {reduced_answer == expected_answer}")
+    print(f"Answers identical: {full_answer == reduced_answer}")
+
+
 
 if __name__ == "__main__":
     run_experiment()
